@@ -1,6 +1,6 @@
 package me.ryanw.simplerouter.util;
 /*
- * This file is part of OvercastStats, licensed under the MIT License (MIT).
+ * This file is part of SimpleRouter, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2015 Ryan W
  *
