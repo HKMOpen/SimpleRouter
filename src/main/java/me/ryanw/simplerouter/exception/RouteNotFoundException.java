@@ -1,8 +1,8 @@
-package me.ryanw.simplerouter.util;
+package me.ryanw.simplerouter.exception;
 /*
  * This file is part of SimpleRouter, licensed under the MIT License (MIT).
  *
- * Copyright (c) 2015 Ryan W
+ * Copyright (c) Ryan W
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,13 @@ package me.ryanw.simplerouter.util;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-public interface RouterCallback<T> {
-    void call(T result);
+
+public class RouteNotFoundException extends RuntimeException {
+
+    private static final long serialVersionUID = -6217704860910858725L;
+
+    public RouteNotFoundException(String message) {
+        // Trigger RouteNotFoundEvent code here
+        super(message);
+    }
 }
