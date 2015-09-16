@@ -42,7 +42,8 @@ public class SimpleRouter {
      * {@link Context} is required in order to launch new activities via {@link Intent}s.
      */
     private static final SimpleRouter sharedRouter = new SimpleRouter();
-    private final Map<String, Route> predefinedRoutes = new HashMap<String, Route>();
+    private final Map<String, Route> predefinedRoutes = new HashMap<>();
+    private final Map<String, Route> cachedRoutes = new HashMap<>();
     private Context context;
 
     /**
@@ -70,7 +71,7 @@ public class SimpleRouter {
      * @param routeCallback THe code block to execute when the URL is called.
      */
     public void route(String routeUrl, Class<? extends Activity> targetClass, RouteCallback<Route> routeCallback) {
-        String cleanedRouteUrl = cleanRouteUrl(routeUrl);
+        String cleanedRouteUrl = cleanUrl(routeUrl);
         Route route = new Route(cleanedRouteUrl);
         if (targetClass != null) route.setTargetClass(targetClass);
         if (routeCallback != null) route.setCallback(routeCallback);
@@ -78,22 +79,36 @@ public class SimpleRouter {
     }
 
     /**
-     * Calls a route URL without parameters, typically used for simple things like "/logout".
-     * @param routeUrl The route URL to call.
+     * Calls a route URL with the parameters embedded; example "/user/ryanw-se/project/1".
+     * @param url The URL to call and identify with the router.
      */
-    public void call(String routeUrl) {
-        this.call(routeUrl, null);
+    public void call(String url) {
+        this.call(url, null);
     }
 
     /**
-     * Calls a route URL with parameters, typically used for more complex things like "/user/ryanw-se/project/1".
-     * @param routeUrl The route URL to call.
-     * @param parameters The parameters to be passed on to the new {@link Activity}.
+     * Calls a route URL with the parameters embedded; example "/user/ryanw-se/project/1".
+     * @param url The URL to call and identify with the router.
+     * @param extras Additional parameters to pass along with the URL parameters.
      */
-    public void call(String routeUrl, Bundle parameters) {
-        String cleanedRouteUrl = cleanRouteUrl(routeUrl);
-        if (!predefinedRoutes.containsKey(cleanedRouteUrl)) throw new RouteNotFoundException("No route found at the following address, " + cleanedRouteUrl);
-        // Take the routeUrl, replace the :params with each of the parameters in the bundle. Verify that the amount of expected params meets the provided param amount.
+    public void call(String url, Bundle extras) {
+        String cleanedUrl = cleanUrl(url);
+        Route route = cachedRoutes.get(cleanedUrl);
+
+        if (route == null) route = determineRoute(cleanedUrl);
+        if (route.getCallback() != null) route.getCallback().call(route);
+
+        if (route.getTargetClass() != null) {
+            if (context == null) throw new NullPointerException("In order to start activities, you need to provide the router with context.");
+            Intent intent = new Intent();
+            intent.putExtras(route.getParameters());
+            if (extras != null) intent.putExtras(extras);
+            intent.setClass(context, route.getTargetClass());
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
+
+        if (cachedRoutes.get(cleanedUrl) == null) cachedRoutes.put(cleanedUrl, route);
     }
 
     /**
@@ -119,7 +134,7 @@ public class SimpleRouter {
 
     /**
      * Gets a list of all predefined routes, using the {@link #route} methods.
-     * @return List of predefined routes without parameters.
+     * @return List of predefined {@link Route}s without parameters.
      */
     public Map<String, Route> getPredefinedRoutes() {
         return predefinedRoutes;
@@ -135,7 +150,7 @@ public class SimpleRouter {
 
     /**
      * Sets the {@link Context} to be used when using {@link Intent}s to launch new {@link Activity}s.
-     * @param context The context to be used when launching new {@link Activity}s via {@link Intent}s.
+     * @param context The {@link Context} to be used when launching new {@link Activity}s via {@link Intent}s.
      */
     public void setContext(Context context) {
         this.context = context;
@@ -143,16 +158,61 @@ public class SimpleRouter {
 
     /**
      * Gets the {@link Context} to be used when using {@link Intent}s to launch new {@link Activity}s.
-     * @return The context to be used when launching new {@link Activity}s via {@link Intent}s.
+     * @return The {@link Context} to be used when launching new {@link Activity}s via {@link Intent}s.
      */
     public Context getContext() {
         return context;
     }
 
     /**
+     * Takes a URL, determines what route it falls under and creates a new {@link Route} instance using that information.
+     * @param url The URL with payload data we want to check the predefined routes for.
+     * @return New {@link Route} object with parameters bundle.
+     */
+    private Route determineRoute(String url) {
+        String[] urlSegments = cleanUrl(url).split("/");
+        for (Map.Entry<String, Route> routeEntry : predefinedRoutes.entrySet()) {
+            String[] routeUrlSegments = routeEntry.getKey().split("/");
+            if (routeUrlSegments.length != urlSegments.length) continue;
+            Bundle routeParams = createParamBundle(urlSegments, routeUrlSegments);
+            if (routeParams == null) continue;
+
+            Route route = new Route(routeEntry.getKey());
+            if (routeEntry.getValue().getCallback() != null) route.setCallback(routeEntry.getValue().getCallback());
+            if (routeEntry.getValue().getTargetClass() != null) route.setTargetClass(routeEntry.getValue().getTargetClass());
+            route.setParameters(routeParams);
+            return route;
+
+        }
+        throw new RouteNotFoundException("Route not found for the url " + url);
+    }
+
+    /**
+     * Checks each of the segments in the URL, compares them and puts the payload in a {@link Bundle} with the :variable.
+     * @param urlSegments The routed URL with the payload embedded; example "/users/ryanw-se/projects/10".
+     * @param routeUrlSegments The route URL with variables embedded; example "/users/:userId/projects/:projectId".
+     * @return {@link Bundle} with the payloads assigned to their route variables.
+     */
+    private Bundle createParamBundle(String[] urlSegments, String[] routeUrlSegments) {
+        Bundle routeParams = new Bundle();
+        for (int i = 0; i < routeUrlSegments.length; i++) {
+            String routeUrlSegment = routeUrlSegments[i];
+            String urlSegment = urlSegments[i];
+
+            if (routeUrlSegment.charAt(0) == ':') {
+                routeParams.putString(routeUrlSegment.substring(1, routeUrlSegment.length()), urlSegment);
+                continue;
+            }
+
+            if (!routeUrlSegment.equalsIgnoreCase(urlSegment)) return null;
+        }
+        return routeParams;
+    }
+
+    /**
      * Removes the starting forward slash from the URL.
      */
-    private String cleanRouteUrl(String routeUrl) {
+    private String cleanUrl(String routeUrl) {
         if (routeUrl.startsWith("/")) return routeUrl.substring(1, routeUrl.length());
         return routeUrl;
     }

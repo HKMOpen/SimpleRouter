@@ -28,7 +28,6 @@ public class RouteNotFoundException extends RuntimeException {
     private static final long serialVersionUID = -6217704860910858725L;
 
     public RouteNotFoundException(String message) {
-        // Trigger RouteNotFoundEvent code here
         super(message);
     }
 }
