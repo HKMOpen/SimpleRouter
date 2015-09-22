@@ -22,6 +22,6 @@ package me.ryanw.simplerouter.util;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-public interface RouteCallback<T> {
-    void call(T result);
+public interface RouteCallback<Route> {
+    void call(Route result);
 }
