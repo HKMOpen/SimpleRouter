@@ -1,6 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
+build.dependsOn.remove("uploadArchives")
+
 buildscript {
     repositories {
         mavenCentral()
