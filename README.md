@@ -4,6 +4,8 @@ SimpleRouter is a powerful yet simplistic URL router specifically designed for A
 predefine URL routes, attach code blocks to these URL routes or even Android activities. It has full support for URL parameters
 and makes it super quick and easy to get the information you need, without a hassle.
 
+You can check out the Javadocs here, http://ryanw-se.github.io/SimpleRouter/!
+
 ### Issue Reporting
 
 * Verify that the issue hasn't already been reported, if it has add onto that issue rather than creating a new one.
@@ -47,7 +49,9 @@ One of the main benefits of using SimpleRouter, is its super quick and easy setu
 defined instance of SimpleRouter, which is accessible throughout your entire project. This is the recommended usage. Calling the
 statically defined instance of SimpleRouter, is super easy and can be done with the following code block.
 
-```java SimpleRouter.getSharedRouter();```
+```java 
+SimpleRouter.getSharedRouter();
+```
 
 All of the code snippets in this documentation will use this code block and its highly recommended when manipulating the router.
 
@@ -55,7 +59,9 @@ SimpleRouter also supports opening Android activities via URL, this requires you
 these activities, if you do not specify context, you will not be able to open Android activities and a NullPointerException will
 be thrown. Here is how you can set the context to be used by the router.
 
-```java SimpleRouter.setContext(context);```
+```java 
+SimpleRouter.setContext(context);
+```
 
 ### Routing URLs
 
@@ -76,18 +82,18 @@ within the RouteCallback function. In this case, you can reference those paramet
 Here is what the code would look like, if you were to map a route to a RouteCallback function. 
 
 ```java
-    SimpleRouter.getSharedRouter().route("/users/:userId/projects/:projectId", new RouteCallback<Route>() {
-        @Override
-        public void call(Route result) {
-            // Run code block and interact with the variables passed through the route.
-        }
-    });
+SimpleRouter.getSharedRouter().route("/users/:userId/projects/:projectId", new RouteCallback<Route>() {
+   @Override
+   public void call(Route result) {
+      // Run code block and interact with the variables passed through the route.
+   }
+});
 ```
 
 Here is what the code would look like, if you were to map a route to an Android activity.
 
 ```java
-    SimpleRouter.getSharedRouter().route("/users/:userId/projects/:projectId", MyActivity.class);
+SimpleRouter.getSharedRouter().route("/users/:userId/projects/:projectId", MyActivity.class);
 ```
 
 You can also specify routes where you call both an Android activity and a RouteCallback at the same time. But that is
@@ -102,13 +108,13 @@ the parameters for the URL, put everything together and initialize the RouteCall
 This is how calling a URL would look like, in a nut shell.
 
 ```java
-    SimpleRouter.getSharedRouter().call("/users/ryanw-se/projects/10");
+SimpleRouter.getSharedRouter().call("/users/ryanw-se/projects/10");
 ```
 
 You can also call external URLs, like Youtube videos and open them in a new Android activity, here is what that would look like.
 
 ```java
-    SimpleRouter.getSharedRouter().callExt("https://www.youtube.com/watch?v=8To-6VIJZRE");
+SimpleRouter.getSharedRouter().callExt("https://www.youtube.com/watch?v=8To-6VIJZRE");
 ```
 
 
