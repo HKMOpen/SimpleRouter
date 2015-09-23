@@ -1,7 +1,7 @@
-### SimpleRouter
+### SimpleRouter [![Build Status](https://travis-ci.org/ryanw-se/SimpleRouter.svg?branch=master)](https://travis-ci.org/ryanw-se/SimpleRouter)
 
 SimpleRouter is a powerful yet simplistic URL router specifically designed for Android app development. It allows you to
-predefine URL routes, attach code blocks to these URL routes or even Android activities. It has full support for URL parameters
+predefine routes, attach code blocks to these routes or even Android activities. It has full support for URL parameters
 and makes it super quick and easy to get the information you need, without a hassle.
 
 You can check out the Javadocs here, http://ryanw-se.github.io/SimpleRouter/!
