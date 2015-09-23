@@ -6,4 +6,4 @@ android:
     - build-tools-21.1.2
     - android-17
 script:
-  - gradle build
+  - gradle build -x uploadArchives
